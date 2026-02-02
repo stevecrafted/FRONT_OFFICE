@@ -1,0 +1,5 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "java -cp target/SpringInitTest-1.0.jar:target/lib/* org.Main"
