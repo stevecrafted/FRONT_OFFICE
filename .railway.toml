@@ -2,4 +2,4 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "java -cp target/SpringInitTest-1.0.jar:target/lib/* org.Main"
+startCommand = "java -jar target/spring-init-test-1.0.0.jar"

@@ -6,12 +6,12 @@
     
     <modelVersion>4.0.0</modelVersion>
     
-    <groupId>org</groupId>
-    <artifactId>SpringInitTest</artifactId>
-    <version>1.0</version>
-    <packaging>jar</packaging> <!-- JAR au lieu de WAR -->
+    <groupId>org.example</groupId>
+    <artifactId>spring-init-test</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
     
-    <name>SpringInit</name>
+    <name>Spring Init Test Application</name>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -21,6 +21,13 @@
     </properties>
 
     <dependencies>
+        <!-- ============== FRAMEWORK (VOTRE JAR) ============== -->
+        <dependency>
+            <groupId>com.framework</groupId>
+            <artifactId>spring-init-framework</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Tomcat Embed Core -->
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
@@ -40,27 +47,7 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
-        </dependency>
-
-        <!-- Javassist -->
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.29.2-GA</version>
-        </dependency>
-
-        <!-- Reflections -->
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.10.2</version>
-        </dependency>
-
-        <!-- SLF4J Simple -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.16</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- PostgreSQL Driver -->
@@ -68,6 +55,20 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.4</version>
+        </dependency>
+
+        <!-- SLF4J Simple (pour les logs) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.16</version>
+        </dependency>
+
+        <!-- Reflections (utilise par AnnotationsScanner) -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.10.2</version>
         </dependency>
     </dependencies>
 
@@ -88,34 +89,33 @@
                 </configuration>
             </plugin>
 
-            <!-- Plugin pour créer un JAR exécutable -->
+            <!-- Plugin pour créer un JAR exécutable avec toutes les dépendances -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.Main</mainClass>
-                            <addClasspath>true</addClasspath>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
-            <!-- Plugin pour copier les dépendances -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.1</version>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>copy-dependencies</goal>
+                            <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.myapp.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>

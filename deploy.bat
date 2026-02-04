@@ -2,19 +2,19 @@
 setlocal enabledelayedexpansion
 
 echo ======================================
-echo   DEPLOIEMENT TEST TOMCAT
+echo   DEPLOIEMENT TEST APPLICATION
 echo ======================================
 
-REM Configuration des variables
-set WAR_NAME=SpringInitTest-1.0.war
+REM Configuration
 set TOMCAT_WEBAPPS=C:\xampp\tomcat\webapps
+set JAR_NAME=spring-init-test-1.0.0.jar
 
 echo.
-echo 1. Mise a jour du framework parent...
-cd ..\FRAMEWORK_Railway
-call mvn clean install -q
+echo 1. Compilation du framework...
+cd ..\BackOffice\FRAMEWORK_Railway
+call mvn clean install -DskipTests -q
 if errorlevel 1 (
-    echo ERREUR: Echec de la compilation du framework
+    echo ERREUR: Echec du framework
     pause
     exit /b 1
 )
@@ -24,29 +24,21 @@ echo 2. Compilation du TEST...
 cd ..\TEST
 call mvn clean package -q
 if errorlevel 1 (
-    echo ERREUR: Echec de la compilation du TEST
+    echo ERREUR: Echec du TEST
     pause
     exit /b 1
 )
 
 echo.
-echo 3. Deploiement vers Tomcat...
-if exist "target\%WAR_NAME%" (
-    copy "target\%WAR_NAME%" "%TOMCAT_WEBAPPS%\" /Y
-    echo WAR deploie avec succes!
+echo 3. Lancement de l'application...
+if exist "target\%JAR_NAME%" (
+    echo Application demarre sur http://localhost:8080
+    java -jar "target\%JAR_NAME%"
 ) else (
-    echo ERREUR: WAR non trouve
+    echo ERREUR: JAR non trouve
     pause
     exit /b 1
 )
 
-echo.
-echo 4. Redemarrage Tomcat...
-call net stop Tomcat9 2>nul
-timeout /t 2 /nobreak >nul
-call net start Tomcat9 2>nul
-
-echo ======================================
-echo DEPLOIEMENT TERMINE!
-echo http://localhost:8080/SpringInitTest-1.0/
-echo ======================================
+mvn clean package
+java -jar target/spring-init-test-1.0.0.jar
