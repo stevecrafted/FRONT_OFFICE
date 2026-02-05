@@ -1,10 +1,17 @@
-FROM tomcat:9.0-jdk11
+FROM maven:3.9.6-eclipse-temurin-11 AS build
 
-# Copier le WAR dans webapps
-COPY target/SpringInitTest-1.0.war /usr/local/tomcat/webapps/
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn -q -DskipTests package
 
-# Exposer le port 8080
+FROM eclipse-temurin:11-jre
+
+WORKDIR /app
+ENV PORT=8080
+
+COPY --from=build /app/target /app/target
+COPY --from=build /app/src/main/webapp /app/src/main/webapp
+
 EXPOSE 8080
-
-# Démarrer Tomcat
-CMD ["catalina.sh", "run"]
+CMD ["java", "-jar", "/app/target/spring-init-test-1.0.0.jar"]

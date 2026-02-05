@@ -12,11 +12,12 @@ public class Main {
     public static void main(String[] args) throws LifecycleException {
         
         String portEnv = System.getenv("PORT");
-        int port = portEnv != null ? Integer.parseInt(portEnv) : 8080;
+        int port = portEnv != null ? Integer.parseInt(portEnv) : 8081;
         
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(port);
         tomcat.getConnector();
+        tomcat.getConnector().setProperty("address", "0.0.0.0");
         
         // NE PAS utiliser addWebapp (qui charge web.xml)
         // Utiliser addContext à la place
