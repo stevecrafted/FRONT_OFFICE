@@ -75,7 +75,7 @@ java -jar target/spring-init-test-1.0.0.jar
 ## 🔧 Configuration
 
 ### Variables d'environnement
-- `PORT`: Port d'écoute (défaut: 8081)
+- `PORT`: Port d'écoute (défaut: 8080)
 - `DATABASE_URL`: URL de connexion PostgreSQL
 - `DATABASE_USER`: Utilisateur base de données
 - `DATABASE_PASSWORD`: Mot de passe base de données
@@ -85,7 +85,7 @@ Le projet inclut un script SQL dans `database/base.sql` pour l'initialisation.
 
 ## 🌐 Accès à l'application
 
-- **Local**: http://localhost:8081
+- **Local**: http://localhost:8080
 - **Koyeb**: https://[votre-service].koyeb.app
 
 ## 📊 Monitoring
@@ -118,5 +118,5 @@ docker ps
 docker logs [container-id]
 
 # Tester localement
-curl http://localhost:8081
+curl http://localhost:8080
 ```

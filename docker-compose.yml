@@ -1,41 +1,28 @@
-version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
-    environment:
-      - PORT=8081
-      - DATABASE_URL=jdbc:postgresql://postgres:5432/mydb
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=password
-    depends_on:
-      - postgres
-    networks:
-      - app-network
-    restart: unless-stopped
-
   postgres:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=mydb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: framework_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: steve
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database:/docker-entrypoint-initdb.d
-    networks:
-      - app-network
-    restart: unless-stopped
+      - ./database/base.sql:/docker-entrypoint-initdb.d/base.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Pas besoin de variables d'environnement puisque c'est codé en dur
 
 volumes:
   postgres_data:
-
-networks:
-  app-network:
-    driver: bridge

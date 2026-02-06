@@ -1,8 +1,8 @@
--- Créer la base de données
-CREATE DATABASE framework_test;
+-- -- Créer la base de données
+-- CREATE DATABASE framework_test;
 
--- Se connecter à la base
-\c framework_test;
+-- -- Se connecter à la base
+-- \c framework_test;
 
 -- Créer la table utilisateurs
 CREATE TABLE utilisateurs (

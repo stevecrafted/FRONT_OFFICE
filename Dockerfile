@@ -1,40 +1,33 @@
 # Build stage
-FROM maven:3.9-openjdk-8 AS build
+FROM maven:3.9.6-amazoncorretto-11 AS build
 
 WORKDIR /app
 
-# Copy pom.xml first for better Docker layer caching
-COPY pom.xml .
+# Copier le JAR du framework
+COPY src/main/webapp/WEB-INF/lib/spring-init-framework-1.0.0.jar /app/lib/
 
-# Download dependencies
-RUN mvn dependency:go-offline -B
+# Installer le framework dans le repo local Maven
+RUN mvn install:install-file \
+    -Dfile=/app/lib/spring-init-framework-1.0.0.jar \
+    -DgroupId=com.framework \
+    -DartifactId=spring-init-framework \
+    -Dversion=1.0.0 \
+    -Dpackaging=jar
 
-# Copy source code
-COPY src ./src
+# Copier TOUT le projet
+COPY . .
 
-# Build the application
-RUN mvn clean package -DskipTests
+# FORCER la recompilation complète
+RUN mvn clean compile package -DskipTests
 
 # Runtime stage
-FROM openjdk:8-jre-slim
-
-# Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+FROM amazoncorretto:11-alpine
 
 WORKDIR /app
 
-# Copy the built JAR from build stage
+# Copier le JAR construit
 COPY --from=build /app/target/spring-init-test-1.0.0.jar app.jar
 
-# Copy webapp directory
-COPY --from=build /app/src/main/webapp ./webapp
-
-# Expose port (Koyeb will set PORT env var)
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-8081}/ || exit 1
-
-# Run the application
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
