@@ -20,12 +20,18 @@ public class ReservationController {
     public ModelView listeReservations() {
         ModelView mv = new ModelView();
         mv.setView("reservations/liste.jsp");
-        
-        
+
         List<Reservation> reservations = reservationDAO.findAll();
         mv.addAttribute("reservations", reservations);
-        
+
         return mv;
+    }
+
+    @Json
+    @GetMapping("/api/reservations")
+    public List<Reservation> getReservations() {
+        List<Reservation> Reservations = reservationDAO.findAll();
+        return Reservations;
     }
 
     // ========== FORMULAIRE DE CRÉATION ==========
@@ -34,25 +40,24 @@ public class ReservationController {
         ModelView mv = new ModelView();
         mv.setView("reservations/form.jsp");
         mv.addAttribute("action", "create");
-        
+
         // Liste des hotels pour le formulaire
         List<Hotel> hotels = hotelDAO.findAll();
         mv.addAttribute("hotels", hotels);
-        
+
         return mv;
     }
 
     // ========== CRÉER UNE RESERVATION ==========
     @PostMapping("/reservations/create")
     public ModelView creerReservation(
-        @AnnotationRequestParam("idHotel") int idHotel,
-        @AnnotationRequestParam("idClient") String idClient,
-        @AnnotationRequestParam("nbPassager") int nbPassager
-    ) {
+            @AnnotationRequestParam("idHotel") int idHotel,
+            @AnnotationRequestParam("idClient") String idClient,
+            @AnnotationRequestParam("nbPassager") int nbPassager) {
         Reservation reservation = new Reservation(idHotel, idClient, nbPassager);
-        
+
         ModelView mv = new ModelView();
-        
+
         if (reservationDAO.create(reservation)) {
             mv.setView("redirect:/reservations");
             mv.addAttribute("message", "Réservation créée avec succès");
@@ -60,13 +65,13 @@ public class ReservationController {
             mv.setView("reservations/form.jsp");
             mv.addAttribute("error", "Erreur lors de la création");
             mv.addAttribute("reservation", reservation);
-            
+
             // Recharger la liste des hotels
             List<Hotel> hotels = hotelDAO.findAll();
             mv.addAttribute("hotels", hotels);
         }
-        
+
         return mv;
     }
- 
+
 }
