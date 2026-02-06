@@ -2,6 +2,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="org.example.Model.Reservation" %>
 <%@ page import="org.example.Model.Hotel" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,6 +23,7 @@
         }
         input[type="text"],
         input[type="number"],
+        input[type="datetime-local"],
         select {
             width: 100%; 
             padding: 8px; 
@@ -70,6 +72,13 @@
         List<Hotel> hotels = (List<Hotel>) request.getAttribute("hotels");
         
         String formAction = "create".equals(action) ? "/reservations/create" : "/reservations/update";
+        
+        // Formater la date pour l'input datetime-local
+        String dateHeureValue = "";
+        if (reservation != null && reservation.getDateHeure() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+            dateHeureValue = sdf.format(reservation.getDateHeure());
+        }
     %>
 
     <form method="POST" action="<%= formAction %>">
@@ -113,6 +122,15 @@
                    name="nbPassager" 
                    min="1"
                    value="<%= reservation != null ? reservation.getNbPassager() : "" %>" 
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label for="dateHeure">Date et Heure de Réservation *</label>
+            <input type="datetime-local" 
+                   id="dateHeure" 
+                   name="dateHeure" 
+                   value="<%= dateHeureValue %>" 
                    required>
         </div>
 
