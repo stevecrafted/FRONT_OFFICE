@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    
+
     static {
         try {
             Class.forName("org.postgresql.Driver");
@@ -17,16 +17,21 @@ public class DatabaseConnection {
 
     public static Connection getConnection() throws SQLException {
         // FORCER l'URL Docker
-        String url = "jdbc:postgresql://postgres:5432/framework_test";
+        // String url = "jdbc:postgresql://postgres:5432/framework_test";
+        // String user = "postgres";
+        // String password = "steve";
+
+        String url = "jdbc:postgresql://localhost:5432/framework_test";
         String user = "postgres";
         String password = "steve";
-        
+ 
+
         System.out.println("==========================================");
         System.out.println(" CONNEXION DOCKER FORCÉE:");
         System.out.println("URL: " + url);
         System.out.println("User: " + user);
         System.out.println("==========================================");
-        
+
         try {
             Connection conn = DriverManager.getConnection(url, user, password);
             System.out.println("✅ CONNEXION RÉUSSIE À POSTGRES!");

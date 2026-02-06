@@ -44,16 +44,16 @@
             for (Utilisateur user : utilisateurs) {
         %>
             <tr>
-                <td><%= user.getId() %></td>
+                <%-- <td><%= user.getId() %></td> --%>
                 <td><%= user.getNom() %></td>
                 <td><%= user.getPrenom() %></td>
                 <td><%= user.getEmail() %></td>
                 <td><%= user.getRole() %></td>
                 <td><%= user.getDateCreation() %></td>
                 <td>
-                    <a href="<%= request.getContextPath() %>/utilisateurs/<%= user.getId() %>" class="btn btn-info">Voir</a>
+                    <%-- <a href="<%= request.getContextPath() %>/utilisateurs/<%= user.getId() %>" class="btn btn-info">Voir</a>
                     <a href="<%= request.getContextPath() %>/utilisateurs/<%= user.getId() %>/edit" class="btn btn-primary">Modifier</a>
-                    <a href="<%= request.getContextPath() %>/utilisateurs/<%= user.getId() %>/delete" 
+                    <a href="<%= request.getContextPath() %>/utilisateurs/<%= user.getId() %>/delete"  --%>
                        class="btn btn-danger" 
                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">Supprimer</a>
                 </td>

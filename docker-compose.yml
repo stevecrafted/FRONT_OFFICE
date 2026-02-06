@@ -19,10 +19,13 @@ services:
     build: .
     ports:
       - "8080:8080"
+    volumes:
+      # MONTER les fichiers source en temps réel
+      - ./target/spring-init-test-1.0.0.jar:/app/app.jar:ro
+      - ./src/main/webapp:/app/webapp:ro
+      - ./src:/app/src:ro  # Pour le hot reload si possible
     depends_on:
-      postgres:
-        condition: service_healthy
-    # Pas besoin de variables d'environnement puisque c'est codé en dur
-
+      - postgres
+      
 volumes:
   postgres_data:

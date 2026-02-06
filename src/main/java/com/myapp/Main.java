@@ -12,104 +12,48 @@ public class Main {
     public static void main(String[] args) throws LifecycleException {
         
         String portEnv = System.getenv("PORT");
-        int port = portEnv != null ? Integer.parseInt(portEnv) : 8080;
+        int port = (portEnv != null) ? Integer.parseInt(portEnv) : 8081;
         
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(port);
         tomcat.getConnector();
         tomcat.getConnector().setProperty("address", "0.0.0.0");
         
-        String contextPath = "";
+        // Chemin fixe pour le développement local
+        String docBase = "src/main/webapp";
+        File webappDir = new File(docBase);
         
-// Chercher les JSP dans plusieurs emplacements
-        String[] possiblePaths = {
-            "src/main/webapp",
-            "webapp",
-            "/app/webapp",
-            "/app/src/main/webapp",
-            "."
-        };
-        
-        String docBase = null;
-        for (String path : possiblePaths) {
-            File testDir = new File(path);
-            System.out.println("Test path: " + path + " -> exists: " + testDir.exists());
-            if (testDir.exists() && testDir.isDirectory()) {
-                docBase = testDir.getAbsolutePath();
-                break;
-            }
+        if (!webappDir.exists()) {
+            System.err.println("ERROR: Webapp directory not found: " + docBase);
+            System.err.println("Current directory: " + new File(".").getAbsolutePath());
+            System.exit(1);
         }
         
-        // Si aucun dossier webapp n'est trouvé, créer un répertoire temporaire pour Tomcat
-        if (docBase == null) {
-            try {
-                // Créer un répertoire temporaire pour le contexte web
-                File tempDir = File.createTempFile("tomcat-webapp", "");
-                tempDir.delete();
-                tempDir.mkdirs();
-                docBase = tempDir.getAbsolutePath();
-                System.out.println("Created temporary docBase: " + docBase);
-            } catch (Exception e) {
-                docBase = new File(".").getAbsolutePath();
-            }
-        }
+        System.out.println("Webapp directory: " + webappDir.getAbsolutePath());
         
-        System.out.println("Using docBase: " + docBase);
-        
-        // Vérifier si le dossier existe
-        File docBaseFile = new File(docBase);
-        if (!docBaseFile.exists()) {
-            System.err.println("ERROR: docBase does not exist: " + docBase);
-            // Créer le dossier
-            docBaseFile.mkdirs();
-        }
-        
-        // Lister les fichiers JSP trouvés
-        System.out.println("Looking for JSP files...");
-        findJspFiles(new File(docBase), "");
-        
-        // addContext
-        Context context = tomcat.addContext(contextPath, docBase);
-        
-        // Configuration du multipart
+        // Configurer le contexte
+        Context context = tomcat.addContext("", webappDir.getAbsolutePath());
         context.setAllowCasualMultipartParsing(true);
-
-// Enregistrer le servlet JSP
-        Tomcat.addServlet(context, "jsp", new JspServlet());
-        context.addServletMappingDecoded("*.jsp", "jsp");
-        context.addServletMappingDecoded("*.jspx", "jsp");
+        
+        // Initializer JSP
         context.addServletContainerInitializer(new JasperInitializer(), null);
         
-        // Ajouter les ressources du classpath pour les JSP
-        context.getResources().setCachingAllowed(false);
-        System.setProperty("org.apache.jasper.compiler.Parser.STRICT_QUOTE_ESCAPING", "false");
-        System.setProperty("org.apache.jasper.compiler.Generator.VERIFY_XML", "false");
-
-        // Enregistrer le FrontServlet
+        // ===== AJOUT: Servlet JSP explicite =====
+        Tomcat.addServlet(context, "jsp", new JspServlet());
+        context.addServletMappingDecoded("*.jsp", "jsp");
+        
+        // FrontServlet (DOIT être après le JSP servlet)
         Tomcat.addServlet(context, "FrontServlet", new FrontServlet());
         context.addServletMappingDecoded("/", "FrontServlet");
         
         System.out.println("========================================");
-        System.out.println("🚀 Application démarrée sur le port " + port);
-        System.out.println("📁 Base: " + docBase);
+        System.out.println("🚀 Application démarrée");
+        System.out.println("📡 Port: " + port);
+        System.out.println("📁 Webapp: " + webappDir.getAbsolutePath());
+        System.out.println("🌐 URL: http://localhost:" + port);
         System.out.println("========================================");
         
         tomcat.start();
         tomcat.getServer().await();
-    }
-    
-    private static void findJspFiles(File dir, String indent) {
-        if (dir == null || !dir.exists()) return;
-        
-        File[] files = dir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    findJspFiles(file, indent + "  ");
-                } else if (file.getName().endsWith(".jsp")) {
-                    System.out.println(indent + "JSP: " + file.getAbsolutePath());
-                }
-            }
-        }
     }
 }
