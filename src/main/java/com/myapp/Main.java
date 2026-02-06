@@ -11,15 +11,16 @@ import java.io.File;
 public class Main {
     public static void main(String[] args) throws LifecycleException {
         
+        // Koyeb fournit la variable PORT
         String portEnv = System.getenv("PORT");
-        int port = (portEnv != null) ? Integer.parseInt(portEnv) : 8081;
+        int port = (portEnv != null) ? Integer.parseInt(portEnv) : 8084;
         
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(port);
         tomcat.getConnector();
         tomcat.getConnector().setProperty("address", "0.0.0.0");
         
-        // Chemin fixe pour le développement local
+        // Chemin webapp (fonctionne en local ET dans Docker)
         String docBase = "src/main/webapp";
         File webappDir = new File(docBase);
         
@@ -38,11 +39,11 @@ public class Main {
         // Initializer JSP
         context.addServletContainerInitializer(new JasperInitializer(), null);
         
-        // ===== AJOUT: Servlet JSP explicite =====
+        // Servlet JSP
         Tomcat.addServlet(context, "jsp", new JspServlet());
         context.addServletMappingDecoded("*.jsp", "jsp");
         
-        // FrontServlet (DOIT être après le JSP servlet)
+        // FrontServlet
         Tomcat.addServlet(context, "FrontServlet", new FrontServlet());
         context.addServletMappingDecoded("/", "FrontServlet");
         
@@ -50,7 +51,6 @@ public class Main {
         System.out.println("🚀 Application démarrée");
         System.out.println("📡 Port: " + port);
         System.out.println("📁 Webapp: " + webappDir.getAbsolutePath());
-        System.out.println("🌐 URL: http://localhost:" + port);
         System.out.println("========================================");
         
         tomcat.start();

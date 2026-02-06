@@ -21,27 +21,48 @@ public class DatabaseConnection {
         // String user = "postgres";
         // String password = "steve";
 
-        String url = "jdbc:postgresql://localhost:5432/framework_test";
+        // postgresql://postgres:[YOUR-PASSWORD]@db.ibighlolbxphofypqspr.supabase.co:5432/postgres
+        // MrNaina-Tomobil
+        // ZxBMqWw1kZ0YPo8L
+
+        // String dbUrl =
+        // "jdbc:postgresql://db.ibighlolbxphofypqspr.supabase.co:5432/postgres?user=postgres&password=ZxBMqWw1kZ0YPo8L&sslmode=require";
+        String url = "jdbc:postgresql://postgres:5432/framework_test";
         String user = "postgres";
         String password = "steve";
- 
+
+        // Raha tsy misy url io dbUrl io dia lasa local ho azy ny db
+        String dbUrl = "";
+
+        if (dbUrl != null && !dbUrl.isEmpty()) {
+            url = dbUrl;
+            user = null;
+            password = null;
+        } else {
+            System.out.println(" CONNEXION LOCALE : ");
+            url = "jdbc:postgresql://localhost:5432/framework_test";
+            user = "postgres";
+            password = "steve";
+            System.out.println("URL: " + url);
+        }
+        System.out.println("==========================================");
 
         System.out.println("==========================================");
-        System.out.println(" CONNEXION DOCKER FORCÉE:");
+        System.out.println(" CONNEXION :");
         System.out.println("URL: " + url);
         System.out.println("User: " + user);
         System.out.println("==========================================");
 
         try {
-            Connection conn = DriverManager.getConnection(url, user, password);
-            System.out.println("✅ CONNEXION RÉUSSIE À POSTGRES!");
-            return conn;
+            if (user == null) {
+                // Connexion avec URL complète (Supabase)
+                return DriverManager.getConnection(url);
+            } else {
+                // Connexion locale
+                return DriverManager.getConnection(url, user, password);
+            }
         } catch (SQLException e) {
             System.err.println("❌ ÉCHEC CONNEXION: " + e.getMessage());
-            System.err.println("Vérifiez que:");
-            System.err.println("1. Le service 'postgres' tourne dans Docker");
-            System.err.println("2. La base 'framework_test' existe");
-            System.err.println("3. L'utilisateur 'postgres' a le mot de passe 'steve'");
             throw e;
         }
     }

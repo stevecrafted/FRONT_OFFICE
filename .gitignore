@@ -7,3 +7,10 @@ build/
 # Ignore le dossier lib
 
 target/
+
+tomcat.8080/
+
+tomcat.8081/
+
+tomcat.8084/
+
