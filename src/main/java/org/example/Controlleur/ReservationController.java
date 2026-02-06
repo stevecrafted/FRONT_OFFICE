@@ -2,6 +2,7 @@ package org.example.Controlleur;
 
 import org.annotation.*;
 import org.example.DAO.ReservationDAO;
+import org.example.DTO.ReservationDTO;
 import org.example.DAO.HotelDAO;
 import org.example.Model.Reservation;
 import org.example.Service.ReservationService;
@@ -12,6 +13,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AnnotationContoller
 public class ReservationController {
@@ -32,24 +34,28 @@ public class ReservationController {
         return mv;
     }
 
+    // ========== API RESERVATIONS (JSON avec DTO) ==========
     @Json
     @GetMapping("/api/reservations")
-    public List<Reservation> getReservations(
+    public List<ReservationDTO> getReservations(
             @AnnotationRequestParam(value = "dateStr") String dateStr) {
- 
+
+        System.out.println("API /api/reservations appelée avec params:");
+        System.out.println("  dateStr: " + dateStr); 
+
+        // 1. Filtrer par date si spécifié
         if (dateStr != null && !dateStr.isEmpty()) {
             try {
-                // Convertir la chaîne de date en objet Date
-                // Format attendu: yyyy-MM-dd (ex: 2024-02-06)
                 Date date = Date.valueOf(dateStr);
                 return reservationService.getListReservationByDate(date);
             } catch (IllegalArgumentException e) {
-                System.err.println("Format de date invalide : " + dateStr); 
-                return List.of();
+                System.err.println("Format de date invalide : " + dateStr);
+                return List.of(); // Retourner liste vide
             }
         }
- 
-        return reservationDAO.findAll();
+
+        // 4. Retourner toutes les réservations (avec DTO)
+        return reservationService.getAllReservations();
     }
 
     // ========== FORMULAIRE DE CRÉATION ==========
@@ -73,9 +79,9 @@ public class ReservationController {
             @AnnotationRequestParam("idClient") String idClient,
             @AnnotationRequestParam("nbPassager") int nbPassager,
             @AnnotationRequestParam("dateHeure") String dateHeureStr) {
-        
+
         Reservation reservation = new Reservation(idHotel, idClient, nbPassager);
-        
+
         // Convertir la chaîne de date-heure en Timestamp
         try {
             // Format attendu: yyyy-MM-ddTHH:mm (HTML5 datetime-local)
@@ -108,15 +114,14 @@ public class ReservationController {
     // ========== METTRE À JOUR UNE RESERVATION ==========
     @PostMapping("/reservations/update")
     public ModelView mettreAJourReservation(
-        @AnnotationRequestParam("id") int id,
-        @AnnotationRequestParam("idHotel") int idHotel,
-        @AnnotationRequestParam("idClient") String idClient,
-        @AnnotationRequestParam("nbPassager") int nbPassager,
-        @AnnotationRequestParam("dateHeure") String dateHeureStr
-    ) {
+            @AnnotationRequestParam("id") int id,
+            @AnnotationRequestParam("idHotel") int idHotel,
+            @AnnotationRequestParam("idClient") String idClient,
+            @AnnotationRequestParam("nbPassager") int nbPassager,
+            @AnnotationRequestParam("dateHeure") String dateHeureStr) {
         Reservation reservation = new Reservation(idHotel, idClient, nbPassager);
         reservation.setId(id);
-        
+
         // Convertir la chaîne de date-heure en Timestamp
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
@@ -126,9 +131,9 @@ public class ReservationController {
         } catch (Exception e) {
             System.err.println("❌ Erreur de parsing de date : " + e.getMessage());
         }
-        
+
         ModelView mv = new ModelView();
-        
+
         if (reservationDAO.update(reservation)) {
             mv.setView("redirect:/reservations");
             mv.addAttribute("message", "Réservation mise à jour");
@@ -136,12 +141,12 @@ public class ReservationController {
             mv.setView("reservations/form.jsp");
             mv.addAttribute("error", "Erreur lors de la mise à jour");
             mv.addAttribute("reservation", reservation);
-            
+
             // Recharger la liste des hotels
             List<Hotel> hotels = hotelDAO.findAll();
             mv.addAttribute("hotels", hotels);
         }
-        
+
         return mv;
     }
 }
