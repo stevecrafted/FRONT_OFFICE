@@ -21,7 +21,7 @@ public class Main {
         
         String contextPath = "";
         
-        // Chercher les JSP dans plusieurs emplacements
+// Chercher les JSP dans plusieurs emplacements
         String[] possiblePaths = {
             "src/main/webapp",
             "webapp",
@@ -40,8 +40,18 @@ public class Main {
             }
         }
         
+        // Si aucun dossier webapp n'est trouvé, créer un répertoire temporaire pour Tomcat
         if (docBase == null) {
-            docBase = new File(".").getAbsolutePath();
+            try {
+                // Créer un répertoire temporaire pour le contexte web
+                File tempDir = File.createTempFile("tomcat-webapp", "");
+                tempDir.delete();
+                tempDir.mkdirs();
+                docBase = tempDir.getAbsolutePath();
+                System.out.println("Created temporary docBase: " + docBase);
+            } catch (Exception e) {
+                docBase = new File(".").getAbsolutePath();
+            }
         }
         
         System.out.println("Using docBase: " + docBase);
@@ -64,11 +74,16 @@ public class Main {
         // Configuration du multipart
         context.setAllowCasualMultipartParsing(true);
 
-        // Enregistrer le servlet JSP
+// Enregistrer le servlet JSP
         Tomcat.addServlet(context, "jsp", new JspServlet());
         context.addServletMappingDecoded("*.jsp", "jsp");
         context.addServletMappingDecoded("*.jspx", "jsp");
         context.addServletContainerInitializer(new JasperInitializer(), null);
+        
+        // Ajouter les ressources du classpath pour les JSP
+        context.getResources().setCachingAllowed(false);
+        System.setProperty("org.apache.jasper.compiler.Parser.STRICT_QUOTE_ESCAPING", "false");
+        System.setProperty("org.apache.jasper.compiler.Generator.VERIFY_XML", "false");
 
         // Enregistrer le FrontServlet
         Tomcat.addServlet(context, "FrontServlet", new FrontServlet());
